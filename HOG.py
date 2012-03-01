@@ -44,15 +44,22 @@ def run_prog():
     parser.add_option("-s", "--signed", action="store_true", default=False)
 
     (options, args) = parser.parse_args()
-
-    imgin = Image.open("/home/jgac1g08/OrientedGrads/Images/pedestrian1.png")
+    
+    imgin = Image.open("images/pedestrian1.png")
     #imgin = Image.open(args[0])
 	
     imgin = imgin.convert("L") # convert to greyscale (luminance)
     
     img = np.asarray(imgin)
-    img = img.astype(np.float32) # convert to a floating point
+    img = img.astype(np.float32) # convert to a floating point  
     
+    orients, normcells = HOG(img,options.signed)
+
+    plt.set_cmap(plt.cm.gray)
+    plt.imshow(orients)
+    plt.show()
+
+def HOG(img,sign=False):
     #code here
     # get the gradients
     gradImgVer  = gradextractver(img)
@@ -60,7 +67,7 @@ def run_prog():
     #get the orientations
     orients = orientator(gradImgVer,gradImgHor)
     # signed or unsigned orientations
-    if not options.signed:
+    if not sign:
         orients = np.absolute(orients)
         histrange = [0,np.pi/2]
     else:
@@ -70,9 +77,8 @@ def run_prog():
     # normalise cell histograms over blocks
     normcells = normaliser(cells)
     
-    plt.set_cmap(plt.cm.gray)
-    plt.imshow(orients)
-    plt.show()
+    return orients, normcells
+
 
 if __name__ == '__main__':
     #import timeit
