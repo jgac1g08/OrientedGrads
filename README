@@ -1,4 +1,19 @@
 Notes:
 ------
 
-Using the implementation here: http://lear.inrialpes.fr/people/triggs/pubs/Dalal-cvpr05.pdf seems most sensible. They go over the best parameters and implementation details to use extensivley.
+Using the implementation here: http://lear.inrialpes.fr/people/triggs/pubs/Dalal-cvpr05.pdf seems most sensible.
+They go over the best parameters and implementation details to use extensivley.
+
+1.  RGB colour representation is used
+      - Authough using colour only improves performance by 1.5% so maybe we could just use greyscale
+
+2.  They find the best gradient detector to use is a simple centred [-1, 0, 1] mask
+      - "For colour images, we calculate separate gradients for each colour channel, and take the one with the largest
+    norm as the pixel's gradient vector."
+
+3.  Each pixel contributes a vote to a bin in a histogram associated with the orientation of the gradient centered
+    at that cell. The votes are accumulated over spatial regions called 'cells', i.e. each cell has its own histogram.
+      - The bins could be from 0 - 360 degrees (signed) or 0 - 180 degrees (unsigned). In practice unsigned was found
+      to work the best.
+      - The vote is a function of the gradient magnitude in the cell, it could be just the plain magnitude, it's 
+        square root, or something more complex. In practice just using the plain magintude was best (win!).
