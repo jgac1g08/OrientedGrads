@@ -19,4 +19,12 @@ They go over the best parameters and implementation details to use extensivley.
       - The vote is a function of the gradient magnitude in the cell, it could be just the plain magnitude, it's 
         square root, or something more complex. *In practice just using the plain magintude was best (win!).*
       - It is important to have enough bins for orientation. *9 seems to be the optimal number.*
+      - A cell size of 6x6 seems to work best for human detection.
 
+4.  Some sort of fancy normalisation thing goes on.
+      - *Apparently 3x3 block size works best for human detection.*
+      - Apparently it is good to downweight pixels near the edges of blocks by applying a gaussian spatial window to
+        each pixel (over the block?) before voting. A sigma of 0.5 x block width is used.
+      - They also found using vertical and horisontal blocks as well as square ones can increase accuracy.
+      - They also try circular blocks - I think we should not worry about this.
+      - The normalisation schemes/equations used can be seen in the paper.
