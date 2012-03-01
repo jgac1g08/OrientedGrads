@@ -8,29 +8,78 @@ import numpy as np
 import sys
 import HOG
 from optparse import OptionParser
+from sklearn import svm
+import cPickle as pickle
 
+window_shape = [22, 12]
+
+window_move_step = 1
 
 def run_prog():
     parser = OptionParser()
+    parser.add_option("-m", "--model-file", action="store", default="svm_model.pkl")
     parser.add_option("-s", "--signed", action="store_true", default=False)
 
     (options, args) = parser.parse_args()
     
-    imgin = Image.open("images/pedestrian1.png")
-    #imgin = Image.open(args[0])
+    print "Loading model from file ", options.model_file
+    model_file = open(options.model_file, "rb")
+    svc = pickle.load(model_file)
+    model_file.close()
+    print "Model loaded"
+    
+    #imgin = Image.open("images/pedestrian1.png")
+    imgin = Image.open(args[0])
 	
     imgin = imgin.convert("L") # convert to greyscale (luminance)
     
     img = np.asarray(imgin)
-    img = img.astype(np.float32) # convert to a floating point  
+    #img = img.astype(np.float32) # convert to a floating point  
     
-    orients, normcells = HOG.HOG(img,options.signed)
+    orients, normcells = HOG.HOG(img, options.signed)
+    
+    if normcells.shape[0] <= window_shape[0]:
+        cellx_max = 1
+    else:
+        cellx_max = normcells.shape[0] - window_shape[0]
+        
+    if normcells.shape[1] <= window_shape[1]:
+        celly_max = 1
+    else:
+        celly_max = normcells.shape[1] - window_shape[1]
+    
+    
+    print "Loading training data from file"
+    pos_hogs_file = open("training_hogs_pos.pkl", 'rb')
+    neg_hogs_file = open("training_hogs_neg.pkl", 'rb')
+    
+    pos_hogs = np.asarray(pickle.load(pos_hogs_file))
+    neg_hogs = np.asarray(pickle.load(neg_hogs_file))
 
+    pos_hogs_file.close()
+    neg_hogs_file.close()
+    
+    
+    
+    print "Data loaded, sir!"
+    
+    window_hits = np.zeros((cellx_max, celly_max))
+    
+    
+    
+    for cellx in range(0, cellx_max, window_move_step):
+        for celly in range(0, celly_max, window_move_step):
+            print normcells[cellx:cellx + window_shape[0], celly:celly + window_shape[1]].shape
+            prediction = svc.predict(normcells[cellx:cellx + window_shape[0], celly:celly + window_shape[1]].flatten())
+            print "Prediction at", cellx, celly, "is", prediction
+            window_hits[cellx, celly] = prediction
+    
+    
+    
+    
     plt.set_cmap(plt.cm.gray)
-    plt.imshow(orients)
+    plt.imshow(window_hits)
     plt.show()
-
-
 
 if __name__ == '__main__':
     #import timeit

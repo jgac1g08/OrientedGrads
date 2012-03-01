@@ -11,7 +11,6 @@ import scipy.signal as signal
 import numpy as np
 import sys
 from optparse import OptionParser
-import sPickle
 from randWindowExtractor import randWindowExtractor
 import cPickle as pickle
 from sklearn import svm
@@ -36,16 +35,17 @@ if __name__ == "__main__":
     
     print "Data loaded, sir!"
     
-    training_data = np.concatenate([pos_hogs, neg_hogs])
+    training_data = np.concatenate([pos_hogs[0:500], neg_hogs[0:500]])
     
     
-    training_labels = np.append([0] * len(pos_hogs), [1] * len(neg_hogs))
+    training_labels = np.append([1] * 500, [0] * 500)
     
     svc = svm.SVC(C=0.01)
     svc.fit(training_data, training_labels)
     
-    print "Should be pos (0), result:", svc.predict(pos_hogs[0])
-    print "Should be neg (1), result:", svc.predict(neg_hogs[0])
+    for i in range(500, 600):
+        print "Should be pos (1), result:", svc.predict(pos_hogs[i])
+        print "Should be neg (0), result:", svc.predict(neg_hogs[i])
     
     
     print "Saving model to", options.model_save
