@@ -39,20 +39,7 @@ def normaliser(cells,blocksize=3,e1=0.1): #n.b. edge cells not normalised as it'
             normcells[blockx,blocky] = cells[blockx,blocky] / np.sqrt(np.square(np.linalg.norm(cells[blockx-blocksize//2:blockx+blocksize//2,blocky-blocksize//2:blocky+blocksize//2])) + np.square(e1))
     return normcells
 
-def run_prog():
-    parser = OptionParser()
-    parser.add_option("-s", "--signed", action="store_true", default=False)
-
-    (options, args) = parser.parse_args()
-
-    imgin = Image.open("/home/jgac1g08/OrientedGrads/Images/pedestrian1.png")
-    #imgin = Image.open(args[0])
-	
-    imgin = imgin.convert("L") # convert to greyscale (luminance)
-    
-    img = np.asarray(imgin)
-    img = img.astype(np.float32) # convert to a floating point
-    
+def HOG(img,sign=False,cellsize=6,blocksize=3,histbins=9):
     #code here
     # get the gradients
     gradImgVer  = gradextractver(img)
@@ -60,19 +47,39 @@ def run_prog():
     #get the orientations
     orients = orientator(gradImgVer,gradImgHor)
     # signed or unsigned orientations
-    if not options.signed:
+    if not sign:
         orients = np.absolute(orients)
         histrange = [0,np.pi/2]
     else:
         histrange = [-np.pi/2,np.pi/2]
     # get the cell histograms
-    cells = cellulator(orients,histrange)
+    cells = cellulator(orients,histrange,cellsize,histbins)
     # normalise cell histograms over blocks
-    normcells = normaliser(cells)
+    normcells = normaliser(cells,blocksize)
     
+    return orients, normcells
+
+def run_prog():
+    parser = OptionParser()
+    parser.add_option("-s", "--signed", action="store_true", default=False)
+
+    (options, args) = parser.parse_args()
+    
+    imgin = Image.open("images/pedestrian1.png")
+    #imgin = Image.open(args[0])
+	
+    imgin = imgin.convert("L") # convert to greyscale (luminance)
+    
+    img = np.asarray(imgin)
+    img = img.astype(np.float32) # convert to a floating point  
+    
+    orients, normcells = HOG(img,options.signed)
+
     plt.set_cmap(plt.cm.gray)
     plt.imshow(orients)
     plt.show()
+
+
 
 if __name__ == '__main__':
     #import timeit
