@@ -24,7 +24,7 @@ They go over the best parameters and implementation details to use extensivley.
 4.  Some sort of fancy normalisation thing goes on.
       - *Apparently 3x3 block size works best for human detection.*
       - Apparently it is good to downweight pixels near the edges of blocks by applying a gaussian spatial window to
-        each pixel (over the block?) before voting. A sigma of 0.5 x block width is used.
+        each pixel (over the block?) before voting. A sigma of 0.5 x block width is used. - We won't do this at first
       - They also found using vertical and horisontal blocks as well as square ones can increase accuracy.
       - They also try circular blocks - I think we should not worry about this.
       - The normalisation schemes/equations used can be seen in the paper.
