@@ -1,0 +1,4 @@
+Notes:
+------
+
+Using the implementation here: http://lear.inrialpes.fr/people/triggs/pubs/Dalal-cvpr05.pdf seems most sensible. They go over the best parameters and implementation details to use extensivley.
