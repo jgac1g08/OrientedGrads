@@ -39,6 +39,26 @@ def normaliser(cells,blocksize=3,e1=0.1): #n.b. edge cells not normalised as it'
             normcells[blockx,blocky] = cells[blockx,blocky] / np.sqrt(np.square(np.linalg.norm(cells[blockx-blocksize//2:blockx+blocksize//2,blocky-blocksize//2:blocky+blocksize//2])) + np.square(e1))
     return normcells
 
+def HOG(img,sign=False,cellsize=6,blocksize=3,histbins=9):
+    #code here
+    # get the gradients
+    gradImgVer  = gradextractver(img)
+    gradImgHor  = gradextracthor(img)
+    #get the orientations
+    orients = orientator(gradImgVer,gradImgHor)
+    # signed or unsigned orientations
+    if not sign:
+        orients = np.absolute(orients)
+        histrange = [0,np.pi/2]
+    else:
+        histrange = [-np.pi/2,np.pi/2]
+    # get the cell histograms
+    cells = cellulator(orients,histrange,cellsize,histbins)
+    # normalise cell histograms over blocks
+    normcells = normaliser(cells,blocksize)
+    
+    return orients, normcells
+
 def run_prog():
     parser = OptionParser()
     parser.add_option("-s", "--signed", action="store_true", default=False)
@@ -59,25 +79,6 @@ def run_prog():
     plt.imshow(orients)
     plt.show()
 
-def HOG(img,sign=False):
-    #code here
-    # get the gradients
-    gradImgVer  = gradextractver(img)
-    gradImgHor  = gradextracthor(img)
-    #get the orientations
-    orients = orientator(gradImgVer,gradImgHor)
-    # signed or unsigned orientations
-    if not sign:
-        orients = np.absolute(orients)
-        histrange = [0,np.pi/2]
-    else:
-        histrange = [-np.pi/2,np.pi/2]
-    # get the cell histograms
-    cells = cellulator(orients,histrange)
-    # normalise cell histograms over blocks
-    normcells = normaliser(cells)
-    
-    return orients, normcells
 
 
 if __name__ == '__main__':
