@@ -55,27 +55,33 @@ def run_prog():
     
     orients, normcells = HOG.HOG(img, options.signed)
     
-    if normcells.shape[0] <= window_shape[0]:
-        cellx_max = 1
-    else:
-        cellx_max = normcells.shape[0] - window_shape[0]
-        
-    if normcells.shape[1] <= window_shape[1]:
-        celly_max = 1
-    else:
-        celly_max = normcells.shape[1] - window_shape[1]
+    //if normcells.shape[0] <= window_shape[0]:
+    //    cellx_max = 1
+    //else:
+    //    cellx_max = normcells.shape[0] - window_shape[0]
+    //    
+    //if normcells.shape[1] <= window_shape[1]:
+    //    celly_max = 1
+    //else:
+    //    celly_max = normcells.shape[1] - window_shape[1]
     
     
-    window_hits = np.zeros((cellx_max, celly_max))
+    window_hits = np.zeros((img.shape[0] / window_move_stride, img_shape[1] / window_move_stride))
     
     
     
-    for cellx in range(0, cellx_max, window_move_step):
-        for celly in range(0, celly_max, window_move_step):
-            print normcells[cellx:cellx + window_shape[0], celly:celly + window_shape[1]].shape
-            prediction = svc.predict(normcells[cellx:cellx + window_shape[0], celly:celly + window_shape[1]].flatten())
-            print "Prediction at", cellx, celly, "is", prediction
-            window_hits[cellx, celly] = prediction
+    
+    for x in range(0, img.shape[0], window_move_stride):
+		if (x + ~~window_pixel_shape[0]~~actually might be height, check which way round x and y are!!~~) >= img.shape[0]:
+			break
+        for y in range(0, img.shape[1], window_move_stride):
+			if (y + ~~window_pixel_shape[1]~~actually might be width~~) >= img.shape[1]:
+				break
+            window = img[x:x + window_pixel_shape[0]~~does there need to be + 1 here??~~, y:y + window_pixel_shape[1]~~plus 1??~~]
+			orients, normcells = HOG.HOG(img, options.signed)
+            prediction = svc.predict(normcells.flatten())
+            print "Prediction at", x / window_move_stride, y / window_move_stride, "is", prediction
+            window_hits[x / window_move_stride, y / window_move_stride] = prediction
     
     
     
