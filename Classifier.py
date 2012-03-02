@@ -49,20 +49,6 @@ def run_prog():
         celly_max = normcells.shape[1] - window_shape[1]
     
     
-    print "Loading training data from file"
-    pos_hogs_file = open("training_hogs_pos.pkl", 'rb')
-    neg_hogs_file = open("training_hogs_neg.pkl", 'rb')
-    
-    pos_hogs = np.asarray(pickle.load(pos_hogs_file))
-    neg_hogs = np.asarray(pickle.load(neg_hogs_file))
-
-    pos_hogs_file.close()
-    neg_hogs_file.close()
-    
-    
-    
-    print "Data loaded, sir!"
-    
     window_hits = np.zeros((cellx_max, celly_max))
     
     
