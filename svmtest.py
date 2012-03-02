@@ -14,8 +14,9 @@ from optparse import OptionParser
 from randWindowExtractor import randWindowExtractor
 import cPickle as pickle
 from sklearn import svm
-
 import random
+
+
 
 if __name__ == "__main__":
     parser = OptionParser()
@@ -25,7 +26,7 @@ if __name__ == "__main__":
     
     (options, args) = parser.parse_args()    
     
-    print "Loading training data from file"
+    print "Loading testing data from file"
     pos_hogs_file = open(options.pos_hogs, 'rb')
     neg_hogs_file = open(options.neg_hogs, 'rb')
     
@@ -37,34 +38,28 @@ if __name__ == "__main__":
     
     print "Data loaded, sir!"
     
-    # randomly segment into training and test set
     
-    test_proportion = 0.1
+    print "Loading model from", options.model_save
     
-    
-        
-    training_data = np.concatenate([pos_hogs[0:500], neg_hogs[0:500]])
-    
-    
-    training_labels = np.append([1] * len(pos_hogs), [0] * len(neg_hogs))
-    
-    svc = svm.SVC(C=0.01)
-    svc.fit(training_data, training_labels)
-    
-    for i in range(500, 600):
-        print "Should be pos (1), result:", svc.predict(pos_hogs[i])
-        print "Should be neg (0), result:", svc.predict(neg_hogs[i])
-    
-    
-    print "Test score:", svc.score(training_data, training_labels) 
-    
-    print "Saving model to", options.model_save
-    
-    model_file = open(options.model_save, "wb")
-    pickle.dump(svc, model_file)
+    model_file = open(options.model_save, "rb")
+    svc = pickle.load(model_file)
     model_file.close()
     
-    print "Model saved"
+    print "Model loaded"
+    
+    print "Testing..."
+    
+    testing_pos = random.sample(pos_hogs, 200)
+    testing_neg = random.sample(pos_hogs, 200)
+    
+    testing_data = np.concatenate([testing_pos, testing_neg])
+    testing_labels = np.append([1] * len(testing_pos), [0] * len(testing_neg))
+    
+    
+    print "Testing complete! Score:", svc.score(testing_data, testing_labels)
+    
+    
+
     
     print "Finished!"
         

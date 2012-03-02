@@ -10,10 +10,13 @@ import HOG
 from optparse import OptionParser
 from sklearn import svm
 import cPickle as pickle
+from defaultconfig import default
 
-window_shape = [22, 12]
+window_pixel_shape = default['window_pixel_shape']
 
-window_move_step = 1
+window_move_stride = default['window_move_stride']
+
+cellsize = 6
 
 def run_prog():
     parser = OptionParser()
@@ -53,35 +56,65 @@ def run_prog():
     #######################################################################
     #######################################################################
     
+    #orients, normcells = HOG.HOG(img, options.signed)
+    
+    #//if normcells.shape[0] <= window_shape[0]:
+    #//    cellx_max = 1
+    #//else:
+    #//    cellx_max = normcells.shape[0] - window_shape[0]
+    #//    
+    #//if normcells.shape[1] <= window_shape[1]:
+    #//    celly_max = 1
+    #//else:
+    #//    celly_max = normcells.shape[1] - window_shape[1]
+    
+    
+    
+    
+    print "Image shape", img.shape
+    
+    
+    #window_hits = np.zeros((img.shape[0] // window_move_stride, img.shape[1] // window_move_stride))
+    
+    #for x in range(0, img.shape[0], window_move_stride):
+    #    print x // window_move_stride, "of", window_hits.shape[0]
+
+    #    if (x + window_pixel_shape[0]) > img.shape[0]:
+    #        break
+    #    for y in range(0, img.shape[1], window_move_stride):
+    #        if (y + window_pixel_shape[1]) > img.shape[1]:
+    #            break
+    #            
+    #        window = img[x:x + window_pixel_shape[0], y:y + window_pixel_shape[1]]
+    #        orients, normcells = HOG.HOG(window, options.signed)
+    #        prediction = svc.predict(normcells.flatten())
+    #        print "Prediction at", x // window_move_stride, y // window_move_stride, "of", window_hits.shape, "is", prediction
+    #        window_hits[x // window_move_stride, y // window_move_stride] = prediction
+    
+    
+    window_hits = np.zeros((img.shape[0] // cellsize, img.shape[1] // cellsize))
+    
+    window_cell_shape = (window_pixel_shape[0] // cellsize, window_pixel_shape[1] // cellsize)
+    
+    print "Image cells", window_hits.shape
+    print "Window cells", window_cell_shape
+    
     orients, normcells = HOG.HOG(img, options.signed)
+    print "Actual image cells", normcells.shape
     
-    //if normcells.shape[0] <= window_shape[0]:
-    //    cellx_max = 1
-    //else:
-    //    cellx_max = normcells.shape[0] - window_shape[0]
-    //    
-    //if normcells.shape[1] <= window_shape[1]:
-    //    celly_max = 1
-    //else:
-    //    celly_max = normcells.shape[1] - window_shape[1]
-    
-    
-    window_hits = np.zeros((img.shape[0] / window_move_stride, img_shape[1] / window_move_stride))
-    
-    
-    
-    
-    for x in range(0, img.shape[0], window_move_stride):
-		if (x + ~~window_pixel_shape[0]~~actually might be height, check which way round x and y are!!~~) >= img.shape[0]:
-			break
-        for y in range(0, img.shape[1], window_move_stride):
-			if (y + ~~window_pixel_shape[1]~~actually might be width~~) >= img.shape[1]:
-				break
-            window = img[x:x + window_pixel_shape[0]~~does there need to be + 1 here??~~, y:y + window_pixel_shape[1]~~plus 1??~~]
-			orients, normcells = HOG.HOG(img, options.signed)
-            prediction = svc.predict(normcells.flatten())
-            print "Prediction at", x / window_move_stride, y / window_move_stride, "is", prediction
-            window_hits[x / window_move_stride, y / window_move_stride] = prediction
+    for x in range(0, window_hits.shape[0]):
+        print x, "of", window_hits.shape[0]
+
+        if (x + window_cell_shape[0]) > window_hits.shape[0]:
+            break
+        for y in range(0, window_hits.shape[1]):
+            if (y + window_cell_shape[1]) > window_hits.shape[1]:
+                break
+            
+            window = normcells[x:x + window_cell_shape[0], y:y + window_cell_shape[1]]
+            prediction = svc.predict(window.flatten())
+            #print "Prediction at", x // window_move_stride, y // window_move_stride, "of", window_hits.shape, "is", prediction
+            window_hits[x // window_move_stride, y // window_move_stride] = prediction
     
     
     

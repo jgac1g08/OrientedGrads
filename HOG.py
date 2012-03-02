@@ -11,24 +11,24 @@ from optparse import OptionParser
 def gradextractver(image):
     kernal = np.array([[0, -1, 0],[0,0,0],[0,1,0]])
     gradImage = signal.convolve(image,kernal)
-    return gradImage
+    return gradImage[1:-1, 1:-1] # get rid of extra bits convove adds
 
 def gradextracthor(image):
     kernal = np.array([[0, 0, 0],[1,0,-1],[0,0,0]])
     gradImage = signal.convolve(image,kernal)
-    return gradImage
+    return gradImage[1:-1, 1:-1] # get rid of extra bits convove adds
 
 def orientator(imVer,imHor):
     orientation = np.arctan(np.divide(imHor,imVer))
     return orientation
 
 def cellulator(orients,histrange,cellsize=6,histbins=9):
-    cells = np.zeros([orients.shape[0]/cellsize,orients.shape[1]/cellsize,histbins])
+    cells = np.zeros([orients.shape[0]//cellsize,orients.shape[1]//cellsize,histbins])
     xcellrange = orients.shape[0] - cellsize
     ycellrange = orients.shape[1] - cellsize
     for cellx in range(0,xcellrange,cellsize):
         for celly in range(0,ycellrange,cellsize):
-            cells[cellx/cellsize,celly/cellsize], _ = np.histogram(orients[cellx:cellx+cellsize,celly:celly+cellsize],histbins,histrange)
+            cells[cellx//cellsize,celly//cellsize], _ = np.histogram(orients[cellx:cellx+cellsize,celly:celly+cellsize],histbins,histrange)
             #print np.histogram(orients[cellx:cellx+cellsize,celly:celly+cellsize],histbins,histrange)
     return cells
 
