@@ -34,9 +34,27 @@ def cellulator(orients,histrange,cellsize=6,histbins=9):
 
 def normaliser(cells,blocksize=3,e1=0.1): #n.b. edge cells not normalised as it's a faff
     normcells = cells
-    for blockx in range(blocksize//2,cells.shape[0]-blocksize//2):
-        for blocky in range(blocksize//2,cells.shape[1]-blocksize//2):
-            normcells[blockx,blocky] = cells[blockx,blocky] / np.sqrt(np.square(np.linalg.norm(cells[blockx-blocksize//2:blockx+blocksize//2,blocky-blocksize//2:blocky+blocksize//2])) + np.square(e1))
+    for blockx in range(0,cells.shape[0]):
+        for blocky in range(0,cells.shape[1]):
+            if blockx < blocksize//2 and blocky < blocksize//2:
+                normcells[blockx,blocky] = cells[blockx,blocky] / np.sqrt(np.square(np.linalg.norm(cells[0:blockx+blocksize//2,0:blocky+blocksize//2])) + np.square(e1))
+            elif blockx > cells.shape[0] - blocksize//2 and blocky > cells.shape[1] - blocksize//2:
+                normcells[blockx,blocky] = cells[blockx,blocky] / np.sqrt(np.square(np.linalg.norm(cells[blockx-blocksize//2:-1,blocky-blocksize//2:-1])) + np.square(e1))
+            elif blockx > cells.shape[0] - blocksize//2 and blocky < blocksize//2:
+                normcells[blockx,blocky] = cells[blockx,blocky] / np.sqrt(np.square(np.linalg.norm(cells[blockx-blocksize//2:-1,0:blocky+blocksize//2])) + np.square(e1))
+            elif blocky > cells.shape[1] - blocksize//2 and blockx < blocksize//2:
+                normcells[blockx,blocky] = cells[blockx,blocky] / np.sqrt(np.square(np.linalg.norm(cells[0:blockx+blocksize//2,blocky-blocksize//2:-1])) + np.square(e1))
+            elif blockx < blocksize//2:
+                normcells[blockx,blocky] = cells[blockx,blocky] / np.sqrt(np.square(np.linalg.norm(cells[0:blockx+blocksize//2,blocky-blocksize//2:blocky+blocksize//2])) + np.square(e1))
+            elif blocky < blocksize//2:
+                normcells[blockx,blocky] = cells[blockx,blocky] / np.sqrt(np.square(np.linalg.norm(cells[blockx-blocksize//2:blockx+blocksize//2,0:blocky+blocksize//2])) + np.square(e1))
+            elif blocky > cells.shape[1] - blocksize//2:
+                normcells[blockx,blocky] = cells[blockx,blocky] / np.sqrt(np.square(np.linalg.norm(cells[blockx-blocksize//2:blockx+blocksize//2,blocky-blocksize//2:-1])) + np.square(e1))
+            elif blockx > cells.shape[0] - blocksize//2:
+                normcells[blockx,blocky] = cells[blockx,blocky] / np.sqrt(np.square(np.linalg.norm(cells[blockx-blocksize//2:-1,blocky-blocksize//2:blocky+blocksize//2])) + np.square(e1))
+            else:    
+                normcells[blockx,blocky] = cells[blockx,blocky] / np.sqrt(np.square(np.linalg.norm(cells[blockx-blocksize//2:blockx+blocksize//2,blocky-blocksize//2:blocky+blocksize//2])) + np.square(e1))
+            
     return normcells
 
 def HOG(img,sign=False,cellsize=6,blocksize=3,histbins=9):

@@ -1,7 +1,7 @@
 import os
 import Image
 import sys
-
+import random
 import numpy as np
 
 class DirectoryImagesLoader:
@@ -26,6 +26,8 @@ class DirectoryImagesLoader:
     def __len__(self):
         return len(self.dirlist)
         
+    def randomize(self):
+        self.dirlist = random.sample(self.dirlist, len(self.dirlist))
     
 if __name__ == "__main__":
     imgs = DirectoryImagesLoader(sys.argv[1])

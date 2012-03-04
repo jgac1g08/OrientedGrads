@@ -23,6 +23,8 @@ if __name__ == "__main__":
     parser.add_option("-p", "--pos-hogs", action="store", default="training_hogs_pos.pkl")
     parser.add_option("-n", "--neg-hogs", action="store", default="training_hogs_neg.pkl")
     parser.add_option("-m", "--model-save", action="store", default="svm_model.pkl")
+    parser.add_option("-r", "--retrain-false-pos", action="store_true", default=False)
+    parser.add_option("-f", "--false-pos-file", action="store", default="false_pos.pkl")
     
     (options, args) = parser.parse_args()    
     
@@ -30,18 +32,31 @@ if __name__ == "__main__":
     pos_hogs_file = open(options.pos_hogs, 'rb')
     neg_hogs_file = open(options.neg_hogs, 'rb')
     
+    
     pos_hogs = np.asarray(pickle.load(pos_hogs_file))
     neg_hogs = np.asarray(pickle.load(neg_hogs_file))
-
+    
     pos_hogs_file.close()
     neg_hogs_file.close()
+
+    if options.retrain_false_pos:
+        print "Loading false positive data from", options.false_pos_file
+        false_pos_file = open(options.false_pos_file, 'rb')
+        false_pos = np.asarray(pickle.load(false_pos_file))
+        false_pos_file.close()
+        
+        print "neg_hogs len", len(neg_hogs)
+        neg_hogs = np.concatenate([neg_hogs, false_pos])
+        print "neg_hogs len", len(neg_hogs)
+        
+
     
     print "Data loaded, sir!"
     
     # randomly segment into training and test set
     
     #test_proportion = 0.1
-    test_size = 300
+    test_size = 100
     
     pos_rand = random.sample(pos_hogs, len(pos_hogs)) # choose k unique values
     neg_rand = random.sample(neg_hogs, len(neg_hogs))
@@ -60,7 +75,7 @@ if __name__ == "__main__":
     
     training_labels = np.append([1] * len(training_pos), [0] * len(training_neg))
     
-    svc = svm.SVC(C=0.1, kernel='linear', probability=True, scale_C=True)
+    svc = svm.SVC(C=0.1, kernel='linear', probability=False, scale_C=True)
     svc.fit(training_data, training_labels)
     
     testing_data =  np.concatenate([testing_pos, testing_neg])
@@ -72,12 +87,15 @@ if __name__ == "__main__":
     #for i in range(len(testing_data)):
 		#print "Should be", testing_labels[i] ,", result:", svc.predict(testing_data[i])
         
-    print "Test score:", svc.score(testing_data, testing_labels) 
+    print "Test score:", svc.score(testing_data, testing_labels)
     
-    test_probas = svc.predict_proba(testing_data)
+    test_predictions = svc.predict(testing_data)
+       
+    
+    #test_probas = svc.predict_proba(testing_data)
     
     # Compute ROC curve and area the curve - code from http://scikit-learn.org/0.10/auto_examples/plot_roc.html
-    fpr, tpr, thresholds = sklearn.metrics.roc_curve(testing_labels, test_probas[:, 1])
+    fpr, tpr, thresholds = sklearn.metrics.roc_curve(testing_labels, test_predictions)
     roc_auc = sklearn.metrics.auc(fpr, tpr)
     print "Area under the ROC curve : %f" % roc_auc
     
