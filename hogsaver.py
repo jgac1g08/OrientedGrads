@@ -37,10 +37,10 @@ if __name__ == "__main__":
         img = imgs.get_image(i)
         
         if options.random_window:
-            #for i in range(10):
-            win = randWindowExtractor(img)
-            _, normcells = HOG.HOG(win, options.signed)
-            hogs.append(normcells.flatten())
+            for i in range(10):
+                win = randWindowExtractor(img)
+                _, normcells = HOG.HOG(win, options.signed)
+                hogs.append(normcells.flatten())
         else:
             _, normcells = HOG.HOG(img, options.signed)
             hogs.append(normcells.flatten())
