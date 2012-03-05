@@ -75,7 +75,7 @@ if __name__ == "__main__":
     
     training_labels = np.append([1] * len(training_pos), [0] * len(training_neg))
     
-    svc = svm.SVC(C=0.1, kernel='linear', probability=False, scale_C=True)
+    svc = svm.SVC(C=0.1, kernel='linear', probability=True, scale_C=True)
     svc.fit(training_data, training_labels)
     
     testing_data =  np.concatenate([testing_pos, testing_neg])
@@ -89,13 +89,15 @@ if __name__ == "__main__":
         
     print "Test score:", svc.score(testing_data, testing_labels)
     
-    test_predictions = svc.predict(testing_data)
+    test_probas = svc.predict_proba(testing_data)
        
+    for i in range(10):
+        print test_probas[i]
     
     #test_probas = svc.predict_proba(testing_data)
     
     # Compute ROC curve and area the curve - code from http://scikit-learn.org/0.10/auto_examples/plot_roc.html
-    fpr, tpr, thresholds = sklearn.metrics.roc_curve(testing_labels, test_predictions)
+    fpr, tpr, thresholds = sklearn.metrics.roc_curve(testing_labels, test_probas[:, 1])
     roc_auc = sklearn.metrics.auc(fpr, tpr)
     print "Area under the ROC curve : %f" % roc_auc
     

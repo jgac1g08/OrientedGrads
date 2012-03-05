@@ -70,11 +70,11 @@ if __name__ == "__main__":
         
     print "Test score:", svc.score(testing_data, testing_labels) 
     
-    test_predictions = svc.predict(testing_data)
+    test_probas = svc.predict_proba(testing_data)
     
     
     # Compute ROC curve and area the curve - code from http://scikit-learn.org/0.10/auto_examples/plot_roc.html
-    fpr, tpr, thresholds = sklearn.metrics.roc_curve(testing_labels, test_predictions)
+    fpr, tpr, thresholds = sklearn.metrics.roc_curve(testing_labels, test_probas[:,1])
     roc_auc = sklearn.metrics.auc(fpr, tpr)
     print "Area under the ROC curve : %f" % roc_auc
     

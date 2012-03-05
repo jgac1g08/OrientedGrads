@@ -242,8 +242,8 @@ def run_prog():
         for x, y, _ in detected_humans:
             ax.add_patch(matplotlib.patches.Rectangle((y, x), window_pixel_shape[1] / scale, window_pixel_shape[0] / scale, ec='red', facecolor='none', hatch="/"))
     
-    plt.figure()
-    plt.imshow(window_hits)
+    #plt.figure()
+    #plt.imshow(window_hits)
     plt.show()
 
 if __name__ == '__main__':
