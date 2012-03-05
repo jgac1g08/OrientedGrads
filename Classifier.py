@@ -218,7 +218,8 @@ def run_prog():
             print "Image shape", img.shape
             
         
-    if True:    
+    if True:
+        #img = imgin.resize((int(imgin.size[0] * 0.25), int(imgin.size[1] * 0.25)), Image.LINEAR)    
         #img = np.array(imgin, dtype='d', order='C')
         img = np.array(imgin)
         window_hits, detected_humans = detect_humans_multi(img, p_svc, p_scaler, options.signed, debug=True)
@@ -240,7 +241,7 @@ def run_prog():
     
     for scale, detected_humans in humans_scale:
         for x, y, _ in detected_humans:
-            ax.add_patch(matplotlib.patches.Rectangle((y, x), window_pixel_shape[1] / scale, window_pixel_shape[0] / scale, ec='red', facecolor='none', hatch="/"))
+            ax.add_patch(matplotlib.patches.Rectangle((y, x), window_pixel_shape[1] / scale, window_pixel_shape[0] / scale, ec='red', facecolor='none'))
     
     #plt.figure()
     #plt.imshow(window_hits)
