@@ -138,7 +138,7 @@ def detect_humans_multi(img, p_svc, p_scaler, signed=False, debug=True, extract_
     results = multiprocessing.Queue()
     
     num_consumers = multiprocessing.cpu_count()
-    #num_consumers = 1
+    #num_consumers = 8
     print 'Creating %d consumers' % num_consumers
     consumers = [ WindowWorker(tasks, results, pickle.loads(p_svc), pickle.loads(p_scaler), np.copy(normcells)) for i in xrange(num_consumers) ]
     
