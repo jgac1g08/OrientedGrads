@@ -137,7 +137,7 @@ def detect_humans_multi(img, p_svc, p_scaler, signed=False, debug=True, extract_
     tasks = multiprocessing.JoinableQueue()
     results = multiprocessing.Queue()
     
-    num_consumers = multiprocessing.cpu_count() * 2
+    num_consumers = multiprocessing.cpu_count()
     #num_consumers = 1
     print 'Creating %d consumers' % num_consumers
     consumers = [ WindowWorker(tasks, results, pickle.loads(p_svc), pickle.loads(p_scaler), np.copy(normcells)) for i in xrange(num_consumers) ]
@@ -203,23 +203,27 @@ def run_prog():
     else:
         scales = np.linspace(1, 0.2, num=5)
     
-    for i in range(len(scales)):
-        scale = scales[i]
-        print "Doing scale ", scale, i, "of", len(scales)
+    if False:    
+        for i in range(len(scales)):
+            scale = scales[i]
+            print "Doing scale ", scale, i, "of", len(scales)
+            
+            img = imgin.resize((int(imgin.size[0] * scale), int(imgin.size[1] * scale)), Image.LINEAR)
+            
+            img = np.array(img, dtype='d', order='C')
+            
+            if options.random_window:
+                img = randWindowExtractor(img, options.signed)
+            
+            print "Image shape", img.shape
+            
         
-        img = imgin.resize((int(imgin.size[0] * scale), int(imgin.size[1] * scale)), Image.LINEAR)
-        
-        img = np.array(img, dtype='d', order='C')
-        
-        if options.random_window:
-            img = randWindowExtractor(img, options.signed)
-        
-        print "Image shape", img.shape
-        
-        
-        
+    if True:    
+        #img = np.array(imgin, dtype='d', order='C')
+        img = np.array(imgin)
         window_hits, detected_humans = detect_humans_multi(img, p_svc, p_scaler, options.signed, debug=True)
-        humans_scale.append((scale, detected_humans))
+        #window_hits, detected_humans = detect_humans(img, svc, scaler, options.signed, debug=True)
+        humans_scale.append((1.0, detected_humans))
 
     
     fig = plt.figure()
