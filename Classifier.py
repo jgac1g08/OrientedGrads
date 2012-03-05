@@ -13,6 +13,8 @@ from sklearn import svm
 import cPickle as pickle
 from defaultconfig import default
 from randWindowExtractor import randWindowExtractor
+import sklearn
+import time
 
 import multiprocessing
 
@@ -27,13 +29,12 @@ window_pixel_shape = (window_cell_shape[0] * cellsize, window_cell_shape[1] * ce
 # some code from http://broadcast.oreilly.com/2009/04/pymotw-multiprocessing-part-2.html
 class WindowWorker(multiprocessing.Process):
     
-    def __init__(self, task_queue, result_queue, img, svc, scaler, normcells):
+    def __init__(self, task_queue, result_queue, svc, scaler, normcells):
         multiprocessing.Process.__init__(self)
         self.task_queue = task_queue
         self.result_queue = result_queue
         
         
-        self.img = img
         self.svc = svc
         self.scaler = scaler
         self.normcells = normcells
@@ -109,7 +110,7 @@ def detect_humans(img, svc, scaler, signed=False, debug=True, extract_humans_to=
     
     return window_hits, detected_humans
 
-def detect_humans_multi(img, svc, scaler, signed=False, debug=True, extract_humans_to=None):
+def detect_humans_multi(img, p_svc, p_scaler, signed=False, debug=True, extract_humans_to=None):
     window_hits = np.zeros([img.shape[0] // cellsize, img.shape[1] // cellsize])
     detected_humans = []
     
@@ -119,16 +120,11 @@ def detect_humans_multi(img, svc, scaler, signed=False, debug=True, extract_huma
     orients, normcells = HOG.HOG(img, signed, cellsize=cellsize)
     
     #detected_humans.append((0, 0, 1.0))
-    
-    pool_size = multiprocessing.cpu_count() * 2
-    pool = multiprocessing.Pool(processes=pool_size)
+
     
     window_locations = []
     
     for x in range(0, img.shape[0] // cellsize):
-        if debug:
-            print x, "of", img.shape[0] // cellsize
-
         if (x + window_cell_shape[0]) > img.shape[0] // cellsize:
             break
         for y in range(0, img.shape[1] // cellsize):
@@ -142,8 +138,11 @@ def detect_humans_multi(img, svc, scaler, signed=False, debug=True, extract_huma
     results = multiprocessing.Queue()
     
     num_consumers = multiprocessing.cpu_count() * 2
+    #num_consumers = 1
     print 'Creating %d consumers' % num_consumers
-    consumers = [ WindowWorker(tasks, results, img, svc, scaler, normcells) for i in xrange(num_consumers) ]
+    consumers = [ WindowWorker(tasks, results, pickle.loads(p_svc), pickle.loads(p_scaler), np.copy(normcells)) for i in xrange(num_consumers) ]
+    
+    t1 = time.time()
     
     for w in consumers:
         w.start()
@@ -158,9 +157,15 @@ def detect_humans_multi(img, svc, scaler, signed=False, debug=True, extract_huma
     print "Joining"
     tasks.join()
     
+    
+    
     detected_humans = []
     while not results.empty():
         detected_humans.append(results.get())
+    
+    t2 = time.time()
+    
+    print "Took", t2 - t1, "seconds"
     
     print "Num results found:", len(detected_humans)
     
@@ -180,6 +185,9 @@ def run_prog():
     scaler, svc = pickle.load(model_file)
     model_file.close()
     print "Model loaded"
+    
+    p_svc = pickle.dumps(svc)
+    p_scaler = pickle.dumps(scaler)
     
     #imgin = Image.open("images/pedestrian1.png")
     imgin = Image.open(args[0])
@@ -208,10 +216,11 @@ def run_prog():
         
         print "Image shape", img.shape
         
-
-        window_hits, detected_humans = detect_humans_multi(img, svc, scaler, options.signed, debug=True)
+        
+        
+        window_hits, detected_humans = detect_humans_multi(img, p_svc, p_scaler, options.signed, debug=True)
         humans_scale.append((scale, detected_humans))
-    
+
     
     fig = plt.figure()
     ax = fig.add_subplot(111)
